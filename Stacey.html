@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Countdown: Stacey's back!</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f6f3ee; --ink:#1d2433; --muted:#6b7280; --card:#ffffff;
+    --accent:#e2574c; --accent-soft:#fde7e4; --gold:#f2b134; --line:#e7e2d9;
+    --hol:#3b82f6; --hol-soft:#e3edff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;}
+  .wrap{max-width:1040px;margin:0 auto;padding:40px 20px 60px}
+  header{text-align:center;margin-bottom:28px}
+  .eyebrow{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:600;color:var(--accent)}
+  h1{font-family:Fraunces,serif;font-weight:800;font-size:clamp(34px,6vw,60px);margin:8px 0 6px;line-height:1.05}
+  .sub{color:var(--muted);font-size:16px}
+  .clock{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;max-width:720px;margin:28px auto 14px}
+  .unit{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 8px 16px;text-align:center;box-shadow:0 2px 0 var(--line)}
+  .num{font-family:Fraunces,serif;font-weight:800;font-size:clamp(36px,7vw,64px);line-height:1;font-variant-numeric:tabular-nums}
+  .lbl{margin-top:8px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .stats{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:18px 0 8px}
+  .pill{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 16px;font-size:14px}
+  .pill b{color:var(--accent)}
+  .bar{max-width:720px;margin:18px auto 0;height:10px;border-radius:99px;background:#ebe5db;overflow:hidden}
+  .bar>div{height:100%;background:linear-gradient(90deg,var(--gold),var(--accent));width:0;transition:width .6s}
+  .barlbl{max-width:720px;margin:6px auto 0;display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+  .months{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-top:40px}
+  .month{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
+  .month h3{font-family:Fraunces,serif;margin:0 0 10px;font-size:20px}
+  .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  .dow{font-size:11px;color:var(--muted);text-align:center;font-weight:600;padding-bottom:4px}
+  .d{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:13px;border-radius:9px;position:relative;font-variant-numeric:tabular-nums}
+  .d.wk{color:#b3aca1}
+  .d.past{color:#c9c3b9}
+  .d.past::after{content:"";position:absolute;left:18%;right:18%;top:50%;height:2px;background:var(--accent);opacity:.55;transform:rotate(-35deg);border-radius:2px}
+  .d.hol{background:var(--hol-soft);color:var(--hol);font-weight:600}
+  .d.today{outline:2px solid var(--ink);font-weight:700}
+  .d.back{background:var(--accent);color:#fff;font-weight:800;box-shadow:0 0 0 4px var(--accent-soft)}
+  .d.work{background:#f7f4ef}
+  .legend{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin-top:22px;font-size:13px;color:var(--muted)}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .sw{width:14px;height:14px;border-radius:4px;display:inline-block}
+  .done{display:none;text-align:center;margin-top:30px}
+  .done h2{font-family:Fraunces,serif;font-size:clamp(34px,6vw,56px);margin:0;color:var(--accent)}
+  .is-done .clock,.is-done .stats,.is-done .bar,.is-done .barlbl{display:none}
+  .is-done .done{display:block}
+  footer{text-align:center;color:var(--muted);font-size:12px;margin-top:30px}
+  @media (max-width:520px){.clock{gap:8px}.unit{padding:16px 4px 12px;border-radius:14px}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <header>
+    <div class="eyebrow">Document Management Tasmania</div>
+    <h1>Stacey's back in&hellip;</h1>
+    <div class="sub">Stacey Blowfield returns <strong>Monday 1 February 2027</strong></div>
+  </header>
+
+  <div class="clock">
+    <div class="unit"><div class="num" id="dd">–</div><div class="lbl">Days</div></div>
+    <div class="unit"><div class="num" id="hh">–</div><div class="lbl">Hours</div></div>
+    <div class="unit"><div class="num" id="mm">–</div><div class="lbl">Minutes</div></div>
+    <div class="unit"><div class="num" id="ss">–</div><div class="lbl">Seconds</div></div>
+  </div>
+
+  <div class="stats">
+    <div class="pill"><b id="workdays">–</b> working days to go</div>
+    <div class="pill"><b id="weeks">–</b> weeks</div>
+    <div class="pill"><b id="weekends">–</b> weekends</div>
+  </div>
+
+  <div class="bar"><div id="prog"></div></div>
+  <div class="barlbl"><span>Countdown started 4 Nov 2026</span><span id="pct"></span><span>1 Feb 2027</span></div>
+
+  <div class="done">
+    <h2>Welcome back, Stacey! 🎉</h2>
+    <p class="sub">The countdown is over. Good to have you back.</p>
+  </div>
+
+  <div class="months" id="months"></div>
+
+  <div class="legend">
+    <span><i class="sw" style="background:var(--accent)"></i>Back at work</span>
+    <span><i class="sw" style="outline:2px solid var(--ink)"></i>Today</span>
+    <span><i class="sw" style="background:var(--hol-soft)"></i>Tasmanian public holiday</span>
+    <span><i class="sw" style="background:#f7f4ef;border:1px solid var(--line)"></i>Working day left</span>
+  </div>
+
+  <footer>Counting down to 9:00am, Monday 1 February 2027 (Hobart time). Working days exclude weekends and Tasmanian public holidays.</footer>
+</div>
+
+<script>
+  // Target: 9:00am AEDT (UTC+11) on 1 Feb 2027
+  const TARGET = Date.UTC(2027, 0, 31, 22, 0, 0);
+  const START  = Date.UTC(2026, 10, 3, 13, 0, 0); // midnight 4 Nov 2026 Hobart
+  const RETURN_KEY = "2027-02-01";
+  const HOLIDAYS = {
+    "2026-12-25":"Christmas Day",
+    "2026-12-28":"Boxing Day (observed)",
+    "2027-01-01":"New Year's Day",
+    "2027-01-26":"Australia Day"
+  };
+  const pad = n => String(n).padStart(2,"0");
+  const key = (y,m,d) => `${y}-${pad(m+1)}-${pad(d)}`;
+
+  function hobartToday(){
+    const p = new Intl.DateTimeFormat("en-CA",{timeZone:"Australia/Hobart",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+    return p; // YYYY-MM-DD
+  }
+
+  function tick(){
+    const now = Date.now();
+    let diff = TARGET - now;
+    if(diff <= 0){ document.getElementById("app").classList.add("is-done"); return; }
+    const s = Math.floor(diff/1000);
+    document.getElementById("dd").textContent = Math.floor(s/86400);
+    document.getElementById("hh").textContent = pad(Math.floor(s%86400/3600));
+    document.getElementById("mm").textContent = pad(Math.floor(s%3600/60));
+    document.getElementById("ss").textContent = pad(s%60);
+    const pct = Math.min(100,Math.max(0,(now-START)/(TARGET-START)*100));
+    document.getElementById("prog").style.width = pct+"%";
+    document.getElementById("pct").textContent = pct.toFixed(1)+"% of the way";
+  }
+
+  function buildCalendars(){
+    const today = hobartToday();
+    const months = [[2026,10],[2026,11],[2027,0],[2027,1]];
+    const names = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    const host = document.getElementById("months");
+    let workdays = 0, weekendSet = new Set();
+    host.innerHTML = "";
+    for(const [y,m] of months){
+      const el = document.createElement("div"); el.className="month";
+      el.innerHTML = `<h3>${names[m]} ${y}</h3>`;
+      const g = document.createElement("div"); g.className="grid";
+      ["M","T","W","T","F","S","S"].forEach(x=>{const h=document.createElement("div");h.className="dow";h.textContent=x;g.appendChild(h);});
+      const first = new Date(Date.UTC(y,m,1)).getUTCDay(); // 0=Sun
+      const offset = (first+6)%7;
+      for(let i=0;i<offset;i++) g.appendChild(document.createElement("div"));
+      const dim = new Date(Date.UTC(y,m+1,0)).getUTCDate();
+      for(let d=1; d<=dim; d++){
+        const k = key(y,m,d);
+        const dow = new Date(Date.UTC(y,m,d)).getUTCDay();
+        const weekend = dow===0||dow===6;
+        const c = document.createElement("div"); c.className="d"; c.textContent=d;
+        if(weekend) c.classList.add("wk");
+        if(HOLIDAYS[k]){ c.classList.add("hol"); c.title = HOLIDAYS[k]; }
+        if(k < today) c.classList.add("past");
+        if(k === today) c.classList.add("today");
+        if(k === RETURN_KEY){ c.classList.add("back"); c.title="Stacey's back!"; }
+        if(k >= today && k < RETURN_KEY){
+          if(!weekend && !HOLIDAYS[k]){ workdays++; if(k!==today) c.classList.add("work"); }
+          if(dow===6) weekendSet.add(k);
+        }
+        if(k > RETURN_KEY) c.style.visibility="hidden";
+        g.appendChild(c);
+      }
+      el.appendChild(g); host.appendChild(el);
+    }
+    document.getElementById("workdays").textContent = workdays;
+    document.getElementById("weekends").textContent = weekendSet.size;
+    const days = Math.max(0,(TARGET-Date.now())/86400000);
+    document.getElementById("weeks").textContent = (days/7).toFixed(1);
+  }
+
+  buildCalendars(); tick();
+  setInterval(tick,1000);
+  setInterval(buildCalendars,60000);
+</script>
+</body>
+</html>
